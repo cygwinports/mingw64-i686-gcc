@@ -1,0 +1,3 @@
+category: Devel
+requires: libcloog0 libgcc1 libgmp3 libiconv2 libintl8 libmpc1 libmpfr1 libppl mingw64-i686-binutils mingw64-i686-pthreads mingw64-i686-runtime
+sdesc: "GCC for MinGW-w64 Win32 toolchain"
