@@ -1,0 +1,103 @@
+--- origsrc/gcc-4.7.3/config/dfp.m4	2010-09-10 06:39:49.000000000 -0500
++++ src/gcc-4.7.3/config/dfp.m4	2013-05-12 04:32:16.215768300 -0500
+@@ -22,7 +22,7 @@ Valid choices are 'yes', 'bid', 'dpd', a
+   case $1 in
+     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
+     i?86*-*-mingw* | x86_64*-*-mingw* | \
+-    i?86*-*-cygwin*)
++    i?86*-*-cygwin* | x86_64*-*-cygwin*)
+       enable_decimal_float=yes
+       ;;
+     *)
+--- origsrc/gcc-4.7.3/config/picflag.m4	2012-08-06 09:34:27.000000000 -0500
++++ src/gcc-4.7.3/config/picflag.m4	2013-05-12 04:34:22.385984800 -0500
+@@ -17,7 +17,9 @@ case "${$2}" in
+     hppa*64*-*-hpux*)
+ 	# PIC is the default for 64-bit PA HP-UX.
+ 	;;
+-    i[[34567]]86-*-cygwin* | i[[34567]]86-*-mingw* | x86_64-*-mingw*)
++    i[[34567]]86-*-cygwin* | x86_64-*-cygwin*)
++	;;
++    i[[34567]]86-*-mingw* | x86_64-*-mingw*)
+ 	;;
+     i[[34567]]86-*-interix[[3-9]]*)
+ 	# Interix 3.x gcc -fpic/-fPIC options generate broken code.
+--- origsrc/gcc-4.7.3/gcc/config.build	2012-01-04 09:45:29.000000000 -0600
++++ src/gcc-4.7.3/gcc/config.build	2013-05-12 04:36:11.832244800 -0500
+@@ -62,7 +62,7 @@ case $build in
+     # IBM 360/370/390 Architecture
+     build_xm_defines='FATAL_EXIT_CODE=12'
+     ;;
+-  i[34567]86-*-cygwin* )
++  i[34567]86-*-cygwin* | x86_64-*-cygwin*)
+     build_xm_file=i386/xm-cygwin.h
+     build_exeext=.exe
+     ;;
+--- origsrc/gcc-4.7.3/gcc/config.host	2013-05-12 00:14:50.176276500 -0500
++++ src/gcc-4.7.3/gcc/config.host	2013-05-12 04:38:27.023977300 -0500
+@@ -235,7 +235,7 @@ case ${host} in
+         ;;
+     esac
+     ;;
+-  i[34567]86-*-cygwin*)
++  i[34567]86-*-cygwin* | x86_64-*-cygwin*)
+     host_xm_file=i386/xm-cygwin.h
+     out_host_hook_obj=host-cygwin.o
+     host_xmake_file="${host_xmake_file} i386/x-cygwin"
+--- origsrc/gcc-4.7.3/gcc/configure	2013-02-06 09:23:55.000000000 -0600
++++ src/gcc-4.7.3/gcc/configure	2013-05-12 04:35:18.025167200 -0500
+@@ -4892,7 +4892,9 @@ case "${target}" in
+     hppa*64*-*-hpux*)
+ 	# PIC is the default for 64-bit PA HP-UX.
+ 	;;
+-    i[34567]86-*-cygwin* | i[34567]86-*-mingw* | x86_64-*-mingw*)
++    i[34567]86-*-cygwin* | x86_64-*-cygwin*)
++	;;
++    i[34567]86-*-mingw* | x86_64-*-mingw*)
+ 	;;
+     i[34567]86-*-interix[3-9]*)
+ 	# Interix 3.x gcc -fpic/-fPIC options generate broken code.
+@@ -7089,7 +7091,7 @@ else
+   case $target in
+     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
+     i?86*-*-mingw* | x86_64*-*-mingw* | \
+-    i?86*-*-cygwin*)
++    i?86*-*-cygwin* | x86_64*-*-cygwin*)
+       enable_decimal_float=yes
+       ;;
+     *)
+--- origsrc/gcc-4.7.3/libdecnumber/configure	2012-08-06 09:34:27.000000000 -0500
++++ src/gcc-4.7.3/libdecnumber/configure	2013-05-12 04:33:17.559276900 -0500
+@@ -4612,7 +4612,7 @@ else
+   case $target in
+     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
+     i?86*-*-mingw* | x86_64*-*-mingw* | \
+-    i?86*-*-cygwin*)
++    i?86*-*-cygwin* | x86_64*-*-cygwin*)
+       enable_decimal_float=yes
+       ;;
+     *)
+--- origsrc/gcc-4.7.3/libgcc/configure	2012-08-06 09:34:27.000000000 -0500
++++ src/gcc-4.7.3/libgcc/configure	2013-05-12 04:33:21.918526200 -0500
+@@ -4074,7 +4074,7 @@ else
+   case $host in
+     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
+     i?86*-*-mingw* | x86_64*-*-mingw* | \
+-    i?86*-*-cygwin*)
++    i?86*-*-cygwin* | x86_64*-*-cygwin*)
+       enable_decimal_float=yes
+       ;;
+     *)
+--- origsrc/gcc-4.7.3/libiberty/configure	2012-01-23 00:25:28.000000000 -0600
++++ src/gcc-4.7.3/libiberty/configure	2013-05-12 04:35:37.893303600 -0500
+@@ -4865,7 +4865,9 @@ case "${host}" in
+     hppa*64*-*-hpux*)
+ 	# PIC is the default for 64-bit PA HP-UX.
+ 	;;
+-    i[34567]86-*-cygwin* | i[34567]86-*-mingw* | x86_64-*-mingw*)
++    i[34567]86-*-cygwin* | x86_64-*-cygwin*)
++	;;
++    i[34567]86-*-mingw* | x86_64-*-mingw*)
+ 	;;
+     i[34567]86-*-interix[3-9]*)
+ 	# Interix 3.x gcc -fpic/-fPIC options generate broken code.
