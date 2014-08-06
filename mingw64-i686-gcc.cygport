@@ -2,8 +2,8 @@ TOOLCHAIN_TARGET="i686-w64-mingw32"
 inherit toolchain
 
 NAME="mingw64-i686-gcc"
-VERSION=4.7.3
-RELEASE=1
+VERSION=4.8.3
+RELEASE=2
 CATEGORY="Devel"
 SUMMARY="GCC for Win32 toolchain"
 DESCRIPTION="The GNU Compiler Collection includes front ends for C, C++,
@@ -18,14 +18,16 @@ esac
 SRC_DIR="gcc-${VERSION}"
 
 PATCH_URI="
-	4.7-cygwin64.patch
-	4.7-libffi-noinst.patch
+	4.6-textdomain.patch
+	4.8-cygwin64.patch
+	4.8-libgcc-deregister.patch
 	4.8-lto-plugin-soname.patch
+	4.9-default-manifest.patch
 "
 
-PKG_NAMES="${NAME}-core ${NAME}-g++ ${NAME}-fortran"
+PKG_NAMES="${NAME}-core ${NAME}-g++ ${NAME}-fortran ${NAME}-ada ${NAME}-objc ${NAME}-objc++"
 mingw64_i686_gcc_core_SUMMARY="${SUMMARY} (C, OpenMP)"
-mingw64_i686_gcc_core_REQUIRES="mingw64-i686-binutils mingw64-i686-pthreads mingw64-i686-runtime"
+mingw64_i686_gcc_core_REQUIRES="mingw64-i686-binutils mingw64-i686-runtime"
 mingw64_i686_gcc_core_CONTENTS="
 	--exclude=c++ --exclude=objc --exclude=gcj --exclude=jni*.h
 	usr/bin/${TOOLCHAIN_TARGET}-cpp.exe
@@ -46,13 +48,14 @@ mingw64_i686_gcc_core_CONTENTS="
 	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/libssp*
 	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/lto*.exe
 	usr/share/doc/
+	usr/share/locale/*/*/mingw32-*
 	usr/share/man/man1/${TOOLCHAIN_TARGET}-cpp.1*
 	usr/share/man/man1/${TOOLCHAIN_TARGET}-gcc.1*
 	usr/share/man/man1/${TOOLCHAIN_TARGET}-gcov.1*
-	${TOOLCHAIN_SYSROOT#/}/mingw/bin/libgcc_s_sjlj-1.dll
-	${TOOLCHAIN_SYSROOT#/}/mingw/bin/libgomp-1.dll
-	${TOOLCHAIN_SYSROOT#/}/mingw/bin/libquadmath-0.dll
-	${TOOLCHAIN_SYSROOT#/}/mingw/bin/libssp-0.dll
+	${TOOLCHAIN_BINDIR#/}/libgcc_s_sjlj-1.dll
+	${TOOLCHAIN_BINDIR#/}/libgomp-1.dll
+	${TOOLCHAIN_BINDIR#/}/libquadmath-0.dll
+	${TOOLCHAIN_BINDIR#/}/libssp-0.dll
 "
 mingw64_i686_gcc_g___SUMMARY="${SUMMARY} (C++)"
 mingw64_i686_gcc_g___CONTENTS="
@@ -64,7 +67,7 @@ mingw64_i686_gcc_g___CONTENTS="
 	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/libstdc++.*
 	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/libsupc++.*
 	usr/share/man/man1/${TOOLCHAIN_TARGET}-g++.1*
-	${TOOLCHAIN_SYSROOT#/}/mingw/bin/libstdc++-6.dll
+	${TOOLCHAIN_BINDIR#/}/libstdc++-6.dll
 "
 mingw64_i686_gcc_fortran_SUMMARY="${SUMMARY} (Fortran)"
 mingw64_i686_gcc_fortran_CONTENTS="
@@ -74,13 +77,34 @@ mingw64_i686_gcc_fortran_CONTENTS="
 	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/libcaf_single.*
 	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/libgfortran*
 	usr/share/man/man1/${TOOLCHAIN_TARGET}-gfortran.1*
-	${TOOLCHAIN_SYSROOT#/}/mingw/bin/libgfortran-3.dll
+	${TOOLCHAIN_BINDIR#/}/libgfortran-3.dll
+"
+mingw64_i686_gcc_objc_SUMMARY="${SUMMARY} (Objective-C)"
+mingw64_i686_gcc_objc_CONTENTS="
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/include/objc/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/cc1obj.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/libobjc.*
+	${TOOLCHAIN_BINDIR#/}/libobjc-4.dll
+"
+mingw64_i686_gcc_objc___SUMMARY="${SUMMARY} (Objective-C++)"
+mingw64_i686_gcc_objc___REQUIRES="${NAME}-core ${NAME}-g++ ${NAME}-objc"
+mingw64_i686_gcc_objc___CONTENTS="
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/cc1objplus.exe
+"
+mingw64_i686_gcc_ada_SUMMARY="${SUMMARY} (Ada)"
+mingw64_i686_gcc_ada_REQUIRES="${NAME}-core"
+mingw64_i686_gcc_ada_CONTENTS="
+	usr/bin/${TOOLCHAIN_TARGET}-gnat*.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/adainclude/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/adalib/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION/-*/.*}/gnat1.exe
 "
 
 CYGCONF_ARGS="
+	--libexecdir=/usr/lib
 	--disable-multilib
 	--disable-win32-registry
-	--enable-languages=c,c++,fortran,lto
+	--enable-languages=c,c++,ada,fortran,lto,objc,obj-c++
 	--enable-fully-dynamic-strings
 	--enable-sjlj-exceptions
 	--enable-graphite
@@ -92,7 +116,7 @@ CYGCONF_ARGS="
 	--with-dwarf2
 	--with-gnu-ld --with-gnu-as
 	--with-arch=i686 --with-tune=generic
-	--with-cloog-include=/usr/include/cloog-ppl
+	--with-cloog-include=/usr/include/cloog-isl
 	--with-system-zlib
 "
 
@@ -110,5 +134,5 @@ src_install() {
 	mv $(find ${D}/ -name 'libgcc_s*.dll') ${D}${TOOLCHAIN_SYSROOT}/mingw/bin
 
 	# conflicts with native gcc
-	rm -fr ${D}/usr/share/{gcc-*,info,locale,man/man7}
+	rm -fr ${D}/usr/share/{gcc-*,info,man/man7}
 }
